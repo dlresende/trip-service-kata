@@ -6,38 +6,54 @@ let sinon = require('sinon');
 
 describe('TripService', () => {
 
+    const noFrieds = [];
     const noUser = null,
         alice = {},
         bob = {};
-    const noFrieds = [];
-    const FRANCE = {},
+    let aUser = { getFriends: () => { return noFrieds } };
+    const noTrips = [],
+        FRANCE = {},
         BRAZIL = {};
-    const aUser = { getFriends: () => { return noFrieds } };
 
     let tripService;
+    let sandbox;
 
     beforeEach(() => {
+        sandbox = sinon.sandbox.create();
         tripService = new TripService();
     });
 
+    afterEach(() => {
+        sandbox.restore();
+    });
+
     it('should throw exception when user is not logged in ', () => {
-        sinon.stub(tripService, 'getLoggedUser').returns(noUser);
+        sandbox.stub(tripService, 'getLoggedUser').returns(noUser);
 
         assert.throws(() => tripService.getTripsByUser(aUser), Error);
     });
 
     it('should return no trips when user has no friends', ()  => {
-        sinon.stub(tripService, 'getLoggedUser').returns(aUser);
+        sandbox.stub(tripService, 'getLoggedUser').returns(aUser);
 
         let trips = tripService.getTripsByUser(aUser);
 
-        assert.deepEqual(trips, []);
+        assert.deepEqual(trips, noTrips);
+    });
+
+    it('should return no trips when logged in user is not friend with user', () => {
+        sandbox.stub(tripService, 'getLoggedUser').returns(alice);
+        sandbox.stub(aUser, 'getFriends').returns([bob]);
+
+        let trips = tripService.getTripsByUser(aUser);
+
+        assert.deepEqual(trips, noTrips);
     });
 
     it('should return friend\'s trips when logged in user is friend with user', () => {
-        sinon.stub(aUser, 'getFriends').returns([alice, bob]);
-        sinon.stub(tripService, 'getLoggedUser').returns(alice);
-        sinon.stub(tripService, 'findTripsByUser').returns([FRANCE, BRAZIL]);
+        sandbox.stub(tripService, 'getLoggedUser').returns(alice);
+        sandbox.stub(aUser, 'getFriends').returns([alice, bob]);
+        sandbox.stub(tripService, 'findTripsByUser').returns([FRANCE, BRAZIL]);
 
         let trips = tripService.getTripsByUser(aUser);
 
