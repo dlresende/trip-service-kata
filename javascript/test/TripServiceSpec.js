@@ -6,12 +6,28 @@ let sinon = require('sinon');
 
 describe('TripService', () => {
 
-    it('should throw exception when user is not logged in ', () => {
-        let tripService = new TripService();
-        let noUser = '';
-        sinon.stub(tripService, 'getLoggedUser').returns(null);
+    const noUser = null;
+    const noFrieds = [];
+    const aUser = { getFriends: () => { return noFrieds } };
 
-        assert.throws(() => tripService.getTripsByUser(noUser), Error);
+    let tripService;
+
+    beforeEach(() => {
+        tripService = new TripService();
+    });
+
+    it('should throw exception when user is not logged in ', () => {
+        sinon.stub(tripService, 'getLoggedUser').returns(noUser);
+
+        assert.throws(() => tripService.getTripsByUser(aUser), Error);
+    });
+
+    it('should return no trips when user has no friends', ()  => {
+        sinon.stub(tripService, 'getLoggedUser').returns(aUser);
+
+        let trips = tripService.getTripsByUser(aUser);
+
+        assert.deepEqual(trips, []);
     });
 
 });
