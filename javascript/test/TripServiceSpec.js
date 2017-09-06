@@ -10,7 +10,11 @@ describe('TripService', () => {
     const noUser = null,
         alice = {},
         bob = {};
-    let aUser = { getFriends: () => { return noFrieds } };
+    let aUser = {
+        getFriends: () => {
+            return noFrieds
+        }
+    };
     const noTrips = [],
         FRANCE = {},
         BRAZIL = {};
