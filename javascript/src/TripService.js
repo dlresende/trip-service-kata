@@ -6,28 +6,21 @@ let TripDAO = require('./TripDAO');
 const noFriends = [];
 
 class TripService {
-    getTripsByUser(user) {
-        let loggedUser = this.getLoggedUser();
-
+    getTripsByUser(user, loggedUser) {
         if (loggedUser == null) {
             throw new Error('User not logged in.');
-        } else {
-            if (user.isFriendWith(loggedUser)) {
-                return this.findTripsByUser(user);
-            }
-            return noFriends;
         }
+
+        if (user.isFriendWith(loggedUser)) {
+            return this.findTripsByUser(user);
+        }
+
+        return noFriends;
     }
 
-
-    findTripsByUser() {
+    findTripsByUser(user) {
         return TripDAO.findTripsByUser(user);
     }
-
-    getLoggedUser() {
-        return UserSession.getLoggedUser();
-    }
-
 }
 
 module.exports = TripService
