@@ -1,7 +1,12 @@
 "use strict";
 
-function findTripsByUser(user) {
-    throw new Error("TripDAO should not be invoked on an unit test.");
-}
+module.exports = class TripDAO {
 
-module.exports = {findTripsByUser}
+    static findTripsByUser(user) {
+        throw new Error("TripDAO should not be invoked on an unit test.");
+    }
+
+    by(user) {
+        this.findTripsByUser(user);
+    }
+}

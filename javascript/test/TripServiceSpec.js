@@ -4,11 +4,12 @@ let assert = require('assert');
 let TripService = require('../src/TripService');
 let sinon = require('sinon');
 let User = require('../src/User');
+let TripDAO = require('../src/TripDAO');
 
 describe('TripService', () => {
 
     const noFriends = [];
-    const noUser = null,
+    const userNotLoggedIn = null,
         loggedInUser = new User(),
         alice = new User(),
         bob = new User();
@@ -17,11 +18,13 @@ describe('TripService', () => {
         BRAZIL = {};
 
     let tripService;
+    let trips;
     let sandbox;
 
     beforeEach(() => {
         sandbox = sinon.sandbox.create();
-        tripService = new TripService();
+        trips = new TripDAO();
+        tripService = new TripService(trips);
     });
 
     afterEach(() => {
@@ -29,33 +32,33 @@ describe('TripService', () => {
     });
 
     it('should throw exception when user is not logged in ', () => {
-        let aUser = new User();
+        let friend = new User();
 
-        assert.throws(() => tripService.getTripsByUser(aUser, noUser), Error);
+        assert.throws(() => tripService.getTripsByUser(friend, userNotLoggedIn), Error);
     });
 
     it('should return no trips when user has no friends', () => {
-        let aUserWithNoFriends = new User();
+        let notAFriend = new User();
 
-        let trips = tripService.getTripsByUser(aUserWithNoFriends, loggedInUser);
+        let trips = tripService.getTripsByUser(notAFriend, loggedInUser);
 
         assert.deepEqual(trips, noTrips);
     });
 
     it('should return no trips when logged in user is not friend with user', () => {
-        let aUserWithFriends = new User([bob]);
+        let friend = new User([bob]);
 
-        let trips = tripService.getTripsByUser(aUserWithFriends, loggedInUser);
+        let trips = tripService.getTripsByUser(friend, loggedInUser);
 
         assert.deepEqual(trips, noTrips);
     });
 
     it('should return friend\'s trips when logged in user is friend with user', () => {
-        sandbox.stub(tripService, 'findTripsByUser').returns([FRANCE, BRAZIL]);
-        let aUserWithFriends = new User([alice, bob, loggedInUser]);
+        let friend = new User([alice, bob, loggedInUser]);
+        sandbox.stub(trips, 'by').withArgs(friend).returns([FRANCE, BRAZIL]);
 
-        let trips = tripService.getTripsByUser(aUserWithFriends, loggedInUser);
+        let friendTrips = tripService.getTripsByUser(friend, loggedInUser);
 
-        assert.deepEqual(trips, [FRANCE, BRAZIL]);
+        assert.deepEqual(friendTrips, [FRANCE, BRAZIL]);
     });
 });
